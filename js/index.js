@@ -10,7 +10,7 @@ function createElement(tag, attrs = {}, children = null) {
 		}
 		children.forEach(child => {
 			if (typeof child === "string") {
-				element.textContent = child
+				element.appendChild(document.createTextNode(child))
 			} else if (typeof child === "object") {
 				element.appendChild(child)
 			}
@@ -40,7 +40,8 @@ function createListItem(item, index) {
 						"data-id": item.id,
 						"data-action": "subtask",
 						class: "btn",
-						title: "Add subtask"
+						title: "Add subtask",
+						onclick: () => addSubtaskForm(item.id)
 					}, 
 					createElement("i", {
 						class: "fas fa-plus-square"
@@ -51,7 +52,8 @@ function createListItem(item, index) {
 						"data-id": item.id,
 						"data-action": "delete",
 						class: "btn btn-danger",
-						title: "Delete task"
+						title: "Delete task",
+						onclick: () => deleteTask(item.id)
 					}, 
 					createElement("i", {
 						class: "fas fa-minus-square"
@@ -61,6 +63,23 @@ function createListItem(item, index) {
 		),
 	])
 	return listItem
+}
+
+function createNewTaskForm() {
+	return createElement("form", {
+		class: "new-task",
+		onsubmit: createTask
+	}, [
+		createElement("input", {
+			id: "new-task-title",
+			name: "title",
+			placeholder: "New task",
+		}),
+		" ",
+		createElement("button", {
+			id: "new-task-id"
+		}, "Add")
+	])
 }
 
 function updateListItem(task) {
@@ -108,24 +127,38 @@ function findTask(id, items) {
 	return false
 }
 
+function removeTask(id, items) {
+	for (let i = 0; i < items.length; i++) {
+		const task = items[i]
+		if (task.id === id) {
+			items = items.splice(i, 1)
+			return
+		}
+		if (task.tasks) {
+			const found = removeTask(id, task.tasks)
+		}
+	}
+	return false
+}
+
 function updateParentDone(items) {
 	let result = true
 	for (let i = 0; i < items.length; i++) {
 		const task = items[i]
-		result = result && task.done
 		if (task.tasks) {
 			task.done = updateParentDone(task.tasks)
 		}
+		result = result && task.done
 	}
 	return result
 }
 
-function updateChildrenDone(items) {
+function updateChildrenDone(items, checked) {
 	for (let i = 0; i < items.length; i++) {
 		const task = items[i]
-		task.done = true
+		task.done = checked
 		if (task.tasks) {
-			updateChildrenDone(task.tasks)
+			updateChildrenDone(task.tasks, checked)
 		}
 	}
 }
@@ -137,60 +170,92 @@ function toggleTask(e) {
 		task.done = checked
 		// console.log(`Task #${id} done status updated to ${checked}`)
 	}
-	if (checked && task.tasks) {
-		updateChildrenDone(task.tasks)
-		console.log(task.tasks)
+	if (task.tasks) {
+		updateChildrenDone(task.tasks, checked)
 	}
 	updateParentDone(tasks)
 	updateTasksList(tasks)
+	saveTasks(tasks)
 }
 
-function addSubtaskForm(e) {
-
+function addSubtaskForm(id) {
+	const button = document.getElementById("new-task-id")
+	const input = document.getElementById("new-task-title")
+	if (!Number(id)) {
+		taskContainer.appendChild(newTaskForm)
+	} else {
+		const listItem = document.getElementById(`item-${id}`)
+		button.dataset.id = id
+		listItem.appendChild(newTaskForm)
+	}
+	input.focus()
 }
 
-function deleteTask(e) {
-
+function deleteTask(id) {
+	const listItem = document.getElementById(`item-${id}`)
+	if (listItem) {
+		listItem.remove()
+	}
+	removeTask(id, tasks)
+	renderTasks()
+	saveTasks(tasks)
 }
 
-const tasks = [{
-	id: 123,
-	title: "Make Google",
-	description: "Make big company",
-	done: true,
-	due: false,
-	tasks: [{
-		id: 2123,
-		title: "Make Search",
-		description:"Make search engine",
-		done: true,
-		due: false,
-	}, {
-		id: 987,
-		title: "Make Gmail",
-		description:"Make email service",
+function createTask(e) {
+	e.preventDefault()
+	const parent = document.getElementById("new-task-id")
+	const title = document.getElementById("new-task-title")
+	const task = findTask(Number(parent.dataset.id), tasks)
+	const newTask = {
+		id: Date.now(),
+		title: title.value,
+		description: "",
 		done: false,
-		due: false,
-		tasks: [{
-			id: 384,
-			title: "Send emails",
-			description: "",
-			done: false,
-			due: false
-		}, {
-			id: 3834,
-			title: "Receive emails",
-			description: "",
-			done: false,
-			due: false
-		}]
-	}, {
-		id: 234,
-		title: "Buy Youtube",
-		description:"Join youtube service",
-		done: false,
-		due: false,
-	}]
-}]
+		due: false
+	}
+	if (task) {
+		if (!task.tasks) {
+			task.tasks = []
+		}
+		task.tasks.push(newTask)
+	} else {
+		tasks.push(newTask)
+	}
+	title.value = ""
+	renderTasks()
+	saveTasks(tasks)
+}
 
-document.getElementById("tasks").appendChild(createTaskList(tasks))
+function renderTasks() {
+	taskContainer.textContent = ""
+	const tasksList = createTaskList(tasks)
+	taskContainer.appendChild(tasksList)
+	taskContainer.appendChild(newTaskForm)
+}
+
+async function loadDemoData() {
+	const response = await fetch("./demo.json")
+	const data = await response.json()
+	await saveTasks(data)
+	location.reload()
+}
+
+function loadTasks() {
+	try {
+		return JSON.parse(localStorage.getItem("tasks")) || []
+	} catch(e) {
+		return []
+	}
+}
+
+function saveTasks(tasks) {
+	localStorage.setItem("tasks", JSON.stringify(tasks))
+}
+
+const tasks = loadTasks()
+const taskContainer = document.getElementById("tasks")
+const newTaskForm = createNewTaskForm()
+renderTasks()
+
+document.getElementById("demo").addEventListener("click", loadDemoData)
+// document.body.addEventListener("click", addSubtaskForm)
