@@ -37,6 +37,9 @@ ul ul {
 li {
 	margin: 0.2em;
 }
+li.list-item.drag-over {
+	outline: 1px dotted #ccc;
+}
 label>.btn {
 	margin-left: 1em;
 	text-decoration: none;

@@ -70,6 +70,15 @@ class TaskList {
 			...data
 		}))
 	}
+	setAfter(sourceId, targetId) {
+		const source = this.getTask(sourceId)
+		const target = this.getTask(targetId)
+		source.parentId = target.parentId
+		const sourceIndex = this.tasks.findIndex(task => task.id === sourceId)
+		const targetIndex = this.tasks.findIndex(task => task.id === targetId)
+		this.tasks.splice(sourceIndex, 1)
+		this.tasks.splice(targetIndex, 0, source)
+	}
 	updateTasksDone(task = {}) {
 		const subtasks = this.getSubtasks(task.id || null)
 		if (!subtasks.length) {
@@ -117,6 +126,34 @@ class TaskBoard {
 		this.newTaskForm = this.createNewTaskForm()
 		this.renderTasks()
 		
+	}
+	allowDrop(e) {
+		e.preventDefault()
+		if (e.target.dataset.name === "list-item") {
+			document.querySelectorAll(".drag-over").forEach(item => item.classList.remove("drag-over"))
+			e.target.classList.add("drag-over")
+		}
+	}
+	drop(e) {
+		e.preventDefault()
+		const targetItem = e.target
+		if (targetItem.dataset.name === "list-item") {
+			const sourceElementId = e.dataTransfer.getData("text")
+			const sourceItem = document.getElementById(sourceElementId)
+			const sourceId = Number(sourceItem.dataset.id)
+			const targetId = Number(targetItem.dataset.id)
+			if (sourceId !== targetId) {
+				this.taskList.setAfter(sourceId, targetId)
+				this.renderTasks()
+				this.taskList.saveTasks()
+			}
+			// targetItem.insertAdjacentElement("afterend", sourceItem)
+			// document.querySelectorAll(".list-item").forEach(item => item.classList.remove("drag-over"))
+		}
+	}
+	drag(e) {
+		const id = e.target.id
+		e.dataTransfer.setData("text", id)
 	}
 	createListItem(item, index) {
 		const buttons = []
@@ -166,7 +203,12 @@ class TaskBoard {
 		)
 		const _this = this
 		const listItem = createElement("li", {
-				id: `item-${item.id}`
+				id: `item-${item.id}`,
+				class: "list-item",
+				"data-id": item.id,
+				"data-name": "list-item",
+				draggable: true,
+				ondragstart: this.drag.bind(_this)
 			}, [
 				createElement("input", {
 					id: item.id,
@@ -226,7 +268,11 @@ class TaskBoard {
 		listCheck.checked = task.done
 	}
 	createTaskList(parentId = null) {
-		const list = createElement("ul")
+		const _this = this
+		const list = createElement("ul", {
+			ondrop: this.drop.bind(_this),
+			ondragover: this.allowDrop.bind(_this)
+		})
 		const tasks = this.taskList.getSubtasks(parentId)
 		tasks.forEach((task, index) => {
 			const item = this.createListItem(task, index + 1)
