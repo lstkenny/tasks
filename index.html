@@ -9,8 +9,16 @@
 </head>
 <body>
 	<section>
-		<header>
-			<h1>TO DO</h1>
+		<header id="list">
+			<div class="select-editable">
+				<select id="list-select" onchange="this.nextElementSibling.value=this.value">
+					<option value="TO DO">TO DO</option>
+					<option value="Shopping">Shopping</option>
+					<option value="Car repair">Car repair</option>
+					<option value=""></option>
+				</select>
+				<input type="text" name="format" value="Value" />
+			</div>
 		</header>
 		<main id="tasks">
 		</main>

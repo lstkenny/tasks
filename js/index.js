@@ -36,10 +36,11 @@ class Task {
 	}
 }
 
-class TaskList {
-	constructor(name) {
-		this.name = name
-		this.loadTasks()
+class ToDo {
+	constructor() {
+		this.todoStorage = "tasks"
+		this.todoCurrent = "task"
+		this.loadData()
 	}
 	find(params) {
 		return this.tasks.filter(task => {
@@ -98,32 +99,53 @@ class TaskList {
 			this.updateChildrenDone(task.id, checked)
 		})
 	}
+	setList(name) {
+		this.list = name
+		this.tasks = this.listData[name]
+	}
+	createList(name) {
+		this.list = name
+		this.tasks = []
+		this.saveData()
+		this.loadData()
+	}
+	deleteList(name) {
+		if (!name) {
+			name = this.list
+		}
+		if (this.listData[name]) {
+			delete this.listData[name]
+		}
+		this.saveData()
+		this.loadData()
+	}
 	loadData() {
 		try {
-			return JSON.parse(localStorage.getItem("tasks")) || {}
+			this.listData = JSON.parse(localStorage.getItem(this.todoStorage)) || {}
 		} catch(e) {
 			console.warn(e)
-			return {}
+			this.listData = {}
 		}
+		this.listNames = Object.keys(this.listData)
+		this.list = localStorage.getItem(this.todoCurrent) || this.listNames[0] || ""
+		this.tasks = this.listData[this.list] || []
+		console.log("loading data: ", this.list, this.listData)
 	}
-	loadTasks() {
-		const data = this.loadData()
-		console.log("loading data: ", data)
-		this.tasks = data[this.name] || []
-	}
-	saveTasks(tasks) {
-		const data = this.loadData()
-		data[this.name] = this.tasks
-		console.log("saving data: ", data)
-		localStorage.setItem("tasks", JSON.stringify(data))
+	saveData(tasks) {
+		this.listData[this.list] = this.tasks
+		localStorage.setItem(this.todoStorage, JSON.stringify(this.listData))
+		localStorage.setItem(this.todoCurrent, this.list)
+		console.log("saving data: ", this.list, this.listData)
 	}
 }
 
 class TaskBoard {
 	constructor() {
 		this.container = document.getElementById("tasks")
-		this.taskList = new TaskList("TO DO")
+		this.menu = document.getElementById("list")
+		this.todo = new ToDo()
 		this.newTaskForm = this.createNewTaskForm()
+		this.renderMenu()
 		this.renderTasks()
 		
 	}
@@ -143,9 +165,9 @@ class TaskBoard {
 			const sourceId = Number(sourceItem.dataset.id)
 			const targetId = Number(targetItem.dataset.id)
 			if (sourceId !== targetId) {
-				this.taskList.setAfter(sourceId, targetId)
+				this.todo.setAfter(sourceId, targetId)
 				this.renderTasks()
-				this.taskList.saveTasks()
+				this.todo.saveData()
 			}
 			// targetItem.insertAdjacentElement("afterend", sourceItem)
 			// document.querySelectorAll(".list-item").forEach(item => item.classList.remove("drag-over"))
@@ -155,9 +177,62 @@ class TaskBoard {
 		const id = e.target.id
 		e.dataTransfer.setData("text", id)
 	}
+	selectListName(e) {
+		const option = e.target
+		const input = document.getElementById("list-name")
+		option.nextElementSibling.value = option.value
+		if (!option.value) {
+			input.readOnly = false
+			input.focus()
+			this.container.textContent = ""
+		} else {
+			input.readOnly = true
+			this.todo.setList(option.value)
+			this.renderTasks()
+		}
+	}
+	createNewList(e) {
+		const input = e.target
+		if (!input.value) {
+			return
+		}
+		this.todo.createList(input.value)
+		this.renderMenu()
+		this.renderTasks()
+	}
+	deleteList(e) {
+		this.todo.deleteList()
+		this.renderMenu()
+		this.renderTasks()
+	}
+	createListMenu() {
+		const _this = this
+		const options = this.todo.listNames.map(list => createElement("option", {
+			value: list,
+			selected: (list === this.todo.list)
+		}, list))
+		options.unshift(createElement("option", {
+			value: ""
+		}, "+ Create list"))
+		return createElement("div", {
+			class: "select-editable"
+		}, [
+			createElement("select", {
+				id: "list-select",
+				onchange: this.selectListName.bind(_this)
+			}, options),
+			createElement("input", {
+				id: "list-name",
+				placeholder: "New list",
+				readonly: true,
+				value: this.todo.list,
+				onchange: this.createNewList.bind(_this)
+			})
+		])
+	}
 	createListItem(item, index) {
 		const buttons = []
-		if (this.taskList.hasSubtasks(item.id)) {
+		if (this.todo.hasSubtasks(item.id)) {
 			buttons.push(
 				createElement("a", {
 						href: "#",
@@ -273,7 +348,7 @@ class TaskBoard {
 			ondrop: this.drop.bind(_this),
 			ondragover: this.allowDrop.bind(_this)
 		})
-		const tasks = this.taskList.getSubtasks(parentId)
+		const tasks = this.todo.getSubtasks(parentId)
 		tasks.forEach((task, index) => {
 			const item = this.createListItem(task, index + 1)
 			const children = this.createTaskList(task.id)
@@ -285,7 +360,7 @@ class TaskBoard {
 		return list
 	}
 	updateTasksList(parentId = null) {
-		const tasks = this.taskList.getSubtasks(parentId)
+		const tasks = this.todo.getSubtasks(parentId)
 		tasks.forEach(task => {
 			this.updateListItem(task)
 			this.updateTasksList(task.id)
@@ -301,7 +376,7 @@ class TaskBoard {
 			this.container.appendChild(this.newTaskForm)
 		} else {
 			const listItem = document.getElementById(`item-${id}`)
-			const task = this.taskList.getTask(id)
+			const task = this.todo.getTask(id)
 			addButton.dataset.id = id
 			moveButton.dataset.id = task.parentId
 			listItem.appendChild(this.newTaskForm)
@@ -315,21 +390,21 @@ class TaskBoard {
 	}
 	toggleTask(e) {
 		const { checked, id } = e.target
-		const task = this.taskList.getTask(Number(id))
+		const task = this.todo.getTask(Number(id))
 		if (task) {
 			task.done = checked
 			// console.log(`Task #${id} done status updated to ${checked}`)
 		}
-		this.taskList.updateChildrenDone(task.id, checked)
-		this.taskList.updateTasksDone()
+		this.todo.updateChildrenDone(task.id, checked)
+		this.todo.updateTasksDone()
 		this.updateTasksList()
-		this.taskList.saveTasks()
+		this.todo.saveData()
 	}
 	toggleExpanded(id) {
 		const listItem = document.getElementById(`item-${id}`)
 		const button = listItem.querySelector("a[data-action='expand']")
 		const icon = button.querySelector("i")
-		const task = this.taskList.getTask(Number(id))
+		const task = this.todo.getTask(Number(id))
 		task.collapsed = !task.collapsed
 		listItem.classList.remove("collapsed")
 		if (task.collapsed) {
@@ -348,9 +423,9 @@ class TaskBoard {
 		if (listItem) {
 			listItem.remove()
 		}
-		this.taskList.removeTask(id)
+		this.todo.removeTask(id)
 		this.renderTasks()
-		this.taskList.saveTasks()
+		this.todo.saveData()
 	}
 	createTask(e) {
 		e.preventDefault()
@@ -364,17 +439,29 @@ class TaskBoard {
 			due: false
 		}
 		const parentId = Number(parent.dataset.id)
-		this.taskList.addTask(newTask, parentId)
+		this.todo.addTask(newTask, parentId)
 		title.value = ""
 		this.renderTasks()
 		title.focus()
 		this.addSubtaskForm(parentId)
-		this.taskList.saveTasks()
+		this.todo.saveData()
 	}
 	renderTasks() {
 		this.container.textContent = ""
 		this.container.appendChild(this.createTaskList())
 		this.container.appendChild(this.newTaskForm)
+	}
+	renderMenu() {
+		const _this = this
+		this.menu.textContent = ""
+		this.menu.appendChild(this.createListMenu())
+		this.menu.appendChild(createElement("a", {
+			class: "btn btn-danger",
+			href: "#",
+			onclick: this.deleteList.bind(_this)
+		}, createElement("i", {
+			class: "fas fa-trash-alt"
+		})))
 	}
 }
 
