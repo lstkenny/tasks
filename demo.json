@@ -1,134 +1,130 @@
-[
-    {
+{
+    "name": "Genesis creation",
+    "tasks": [{
         "id": 1632921828953,
-        "title": "Создать небо",
+        "parentId": null,
+        "title": "Create the Heaven",
         "description": "",
         "done": false,
-        "due": false,
-        "tasks": [
-            {
-                "id": 1632922715727,
-                "title": "Создать свет",
-                "description": "",
-                "done": true,
-                "due": false
-            },
-            {
-                "id": 1632922725878,
-                "title": "Отделить свет от тьмы",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922744942,
-                "title": "Создать светила на тверди небесной",
-                "description": "",
-                "done": false,
-                "due": false
-            }
-        ]
-    },
-    {
+        "due": false
+    }, {
+        "id": 1632922715727,
+        "parentId": 1632921828953,
+        "title": "Let there be light",
+        "description": "",
+        "done": true,
+        "due": false
+    }, {
+        "id": 1632922725878,
+        "parentId": 1632921828953,
+        "title": "Divide the light from the darkness",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922744942,
+        "parentId": 1632921828953,
+        "title": "Populates the darkness and light with Sun, Moon and stars to mark the proper times for the festivals of the week and year",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
         "id": 1632921849689,
-        "title": "Создать землю",
+        "parentId": null,
+        "title": "Create the Earth",
         "description": "",
         "done": false,
-        "due": false,
-        "tasks": [
-            {
-                "id": 1632921896255,
-                "title": "Создать твердь посреди воды",
-                "description": "",
-                "done": true,
-                "due": false
-            },
-            {
-                "id": 1632921922979,
-                "title": "Отделить воду над твердью от воды под твердью",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632921988600,
-                "title": "Создать сушу",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632921998349,
-                "title": "Создать моря",
-                "description": "",
-                "done": false,
-                "due": false
-            }
-        ]
-    },
-    {
+        "due": false
+    }, {
+        "id": 1632921896255,
+        "parentId": 1632921849689,
+        "title": "Let there be a firmament in the midst of the waters",
+        "description": "",
+        "done": true,
+        "due": false
+    }, {
+        "id": 1632921922979,
+        "parentId": 1632921849689,
+        "title": "Divide the waters which were under the firmament from the waters which were above the firmament",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632921988600,
+        "parentId": 1632921849689,
+        "title": "Let the waters under the heaven be gathered together unto one place, and let the dry land appear",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632921998349,
+        "parentId": 1632921849689,
+        "title": "Gather together of the waters called Seas",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
         "id": 1632922788259,
-        "title": "Создать жизнь",
+        "parentId": null,
+        "title": "Create living creatures",
         "description": "",
         "done": false,
-        "due": false,
-        "tasks": [
-            {
-                "id": 1632922804768,
-                "title": "Создать растения",
-                "description": "",
-                "done": true,
-                "due": false
-            },
-            {
-                "id": 1632922812540,
-                "title": "Создать рыб",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922820721,
-                "title": "Создать пресмыкающихся",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922855946,
-                "title": "Создать птиц",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922921468,
-                "title": "Создать зверей земных",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922930576,
-                "title": "Создать скот",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922944671,
-                "title": "Создать гадов земных",
-                "description": "",
-                "done": false,
-                "due": false
-            },
-            {
-                "id": 1632922956011,
-                "title": "Создать человека",
-                "description": "",
-                "done": false,
-                "due": false
-            }
-        ]
-    }
-]
+        "due": false
+    }, {
+        "id": 1632922804768,
+        "parentId": 1632922788259,
+        "title": "Make green herb for food",
+        "description": "",
+        "done": true,
+        "due": false
+    }, {
+        "id": 1632922812540,
+        "parentId": 1632922788259,
+        "title": "Make sea-monsters and fish of the sea",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922820721,
+        "parentId": 1632922788259,
+        "title": "Make creeping things",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922855946,
+        "parentId": 1632922788259,
+        "title": "Make fowls",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922921468,
+        "parentId": 1632922788259,
+        "title": "Make beasts of the earth after its kind",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922930576,
+        "parentId": 1632922788259,
+        "title": "Make cattle",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922944671,
+        "parentId": 1632922788259,
+        "title": "Make animals",
+        "description": "",
+        "done": false,
+        "due": false
+    }, {
+        "id": 1632922956011,
+        "parentId": 1632922788259,
+        "title": "Let us make man in our image after our likeness",
+        "description": "",
+        "done": false,
+        "due": false
+    }]
+}
