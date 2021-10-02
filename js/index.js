@@ -6,19 +6,19 @@ class TaskBoard {
 	constructor() {
 		this.container = document.getElementById("tasks")
 		this.menu = document.getElementById("list")
-		this.taskStorage = new TaskStorage()
-		this.taskList = this.taskStorage.getList()
 		this.newTaskForm = createNewTaskForm({
 			createTaskHandler: this.createTask.bind(this), 
 			moveFormHandler: this.moveTaskForm.bind(this)
 		})
-		this.renderMenu()
-		this.renderTasks()
+		this.taskStorage = new TaskStorage()
+		this.render()
 	}
-	loadDemoData() {
-		return fetch("./demo.json")
-			.then(response => response.json())
-			.then(data => this.taskStorage.createList(data))
+	async loadDemoData() {
+		const response = await fetch("./demo.json")
+		const data = await response.json()
+		this.taskStorage.clearData()
+		this.taskStorage.createList(data)
+		this.render()
 	}
 	selectListName(e) {
 		const option = e.target
@@ -43,15 +43,11 @@ class TaskBoard {
 		this.taskStorage.createList({
 			name: input.value
 		})
-		this.taskList = this.taskStorage.getList()
-		this.renderMenu()
-		this.renderTasks()
+		this.render()
 	}
 	deleteList(e) {
 		this.taskStorage.deleteList(this.taskList)
-		this.taskList = this.taskStorage.getList()
-		this.renderMenu()
-		this.renderTasks()
+		this.render()
 	}
 	updateListItem(task) {
 		const listCheck = document.getElementById(task.id)
@@ -72,6 +68,9 @@ class TaskBoard {
 			ondrop: this.moveTask.bind(this),
 			ondragover: dragOver
 		})
+		if (!this.taskList) {
+			return list
+		}
 		const tasks = this.taskList.getSubtasks(parentId)
 		tasks.forEach((task, index) => {
 			const item = createListItem({ 
@@ -187,12 +186,18 @@ class TaskBoard {
 		this.menu.textContent = ""
 		this.menu.appendChild(createListNavigation({
 			items: this.taskStorage.getLists(),
-			currentItem: this.taskList,
+			currentItem: this.taskList || {},
 			selectListHandler: this.selectListName.bind(this),
 			createListHandler: this.createNewList.bind(this),
 			deleteListHandler: this.deleteList.bind(this)
 		}))
 	}
+	render() {
+		this.taskList = this.taskStorage.getList()
+		this.renderMenu()
+		this.renderTasks()
+	}
 }
 
-new TaskBoard()
+const tb = new TaskBoard()
+document.getElementById("demo").addEventListener("click", tb.loadDemoData.bind(tb))

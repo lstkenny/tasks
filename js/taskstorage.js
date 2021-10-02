@@ -64,12 +64,17 @@ class TaskStorage {
 		} catch(e) {
 			console.warn(e)
 		}
-		console.log("loading data", this.list, this.lists)
+		// console.log("loading data", this.list, this.lists)
 	}
-	saveData(tasks) {
+	clearData() {
+		this.lists = []
+		this.list = null
+		this.saveData()
+	}
+	saveData() {
 		localStorage.setItem(this.taskStorage, JSON.stringify(this.lists))
 		localStorage.setItem(this.idStorage, JSON.stringify(this.list))
-		console.log("saving data", this.list, this.lists)
+		// console.log("saving data", this.list, this.lists)
 	}
 }
 
