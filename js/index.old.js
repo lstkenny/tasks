@@ -258,7 +258,6 @@ function toggleTask(e) {
 	const task = findTask(Number(id), tasks)
 	if (task) {
 		task.done = checked
-		// console.log(`Task #${id} done status updated to ${checked}`)
 	}
 	if (task.tasks) {
 		updateChildrenDone(task.tasks, checked)

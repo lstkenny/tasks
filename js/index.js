@@ -46,6 +46,9 @@ class TaskBoard {
 		this.render()
 	}
 	deleteList(e) {
+		if (!this.taskList) {
+			return
+		}
 		this.taskStorage.deleteList(this.taskList)
 		this.render()
 	}
@@ -99,9 +102,9 @@ class TaskBoard {
 		})
 	}
 	addSubtaskForm(id) {
-		const addButton = document.getElementById("new-task-id")
-		const moveButton = document.getElementById("move-task-up")
-		const input = document.getElementById("new-task-title")
+		const addButton = this.newTaskForm.querySelector("#new-task-id")
+		const moveButton = this.newTaskForm.querySelector("#move-task-up")
+		const input = this.newTaskForm.querySelector("#new-task-title")
 		if (!Number(id)) {
 			addButton.dataset.id = 0
 			moveButton.dataset.id = 0
@@ -124,7 +127,6 @@ class TaskBoard {
 		const task = this.taskList.getTask(Number(id))
 		if (task) {
 			task.done = checked
-			// console.log(`Task #${id} done status updated to ${checked}`)
 		}
 		this.taskList.updateChildrenDone(task.id, checked)
 		this.taskList.updateTasksDone()
@@ -173,14 +175,15 @@ class TaskBoard {
 		this.taskList.addTask(newTask, parentId)
 		title.value = ""
 		this.renderTasks()
-		title.focus()
 		this.addSubtaskForm(parentId)
 		this.taskStorage.updateList(this.taskList)
 	}
 	renderTasks() {
 		this.container.textContent = ""
 		this.container.appendChild(this.createTaskList())
-		this.container.appendChild(this.newTaskForm)
+		if (this.taskList) {
+			this.addSubtaskForm()
+		}
 	}
 	renderMenu() {
 		this.menu.textContent = ""

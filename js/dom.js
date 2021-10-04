@@ -1,7 +1,9 @@
 export function createElement(tag, attrs = {}, children = null) {
 	const element = document.createElement(tag)
 	for (let key in attrs) {
-		element.setAttribute(key, attrs[key])
+		if (attrs[key]) {
+			element.setAttribute(key, attrs[key])
+		}
 		element[key] = attrs[key]
 	}
 	if (children) {
@@ -142,8 +144,8 @@ function createListSelect({ items, currentItem, selectListHandler, createListHan
 		createElement("input", {
 			id: "list-name",
 			placeholder: "New list",
-			readonly: true,
-			value: currentItem.name,
+			readonly: !!currentItem.name,
+			value: currentItem.name || "",
 			onchange: createListHandler
 		})
 	])

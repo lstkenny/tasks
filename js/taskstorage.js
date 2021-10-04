@@ -52,7 +52,6 @@ class TaskStorage {
 	deleteList(list) {
 		const id = (typeof list === "object") ? list.id : list
 		const index = this.findListIndex({ id })
-		console.log(id, index)
 		this.list = null
 		this.lists.splice(index, 1)
 		this.saveData()
@@ -63,8 +62,8 @@ class TaskStorage {
 			this.list = JSON.parse(localStorage.getItem(this.idStorage)) || null
 		} catch(e) {
 			console.warn(e)
+			this.clearData()
 		}
-		// console.log("loading data", this.list, this.lists)
 	}
 	clearData() {
 		this.lists = []
@@ -74,7 +73,6 @@ class TaskStorage {
 	saveData() {
 		localStorage.setItem(this.taskStorage, JSON.stringify(this.lists))
 		localStorage.setItem(this.idStorage, JSON.stringify(this.list))
-		// console.log("saving data", this.list, this.lists)
 	}
 }
 
